@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:questionapp/service/datebase.dart';
+import 'package:questionapp/services/datebase.dart';
 
 class Question extends StatefulWidget {
   String category;
-  Question({required this.category});
+  Question({super.key, required this.category});
 
   @override
   State<Question> createState() => _QuestionState();

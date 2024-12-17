@@ -1,6 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:questionapp/admin/add_quiz.dart';
+import '../pages/home.dart';
+import 'package:questionapp/services/datebase.dart';
+import 'package:questionapp/admin/admin_register.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({super.key});
@@ -10,180 +11,193 @@ class AdminLogin extends StatefulWidget {
 }
 
 class _AdminLoginState extends State<AdminLogin> {
-  TextEditingController usernamecontroller = TextEditingController();
-  TextEditingController userpasswordcontroller = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFededeb),
-      body: Container(
-        child: Stack(
-          children: [
-            Container(
-              margin:
-                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
-              padding: const EdgeInsets.only(top: 45, left: 20, right: 20),
-              height: MediaQuery.of(context).size.height,
+      body: isLoading
+          ? Container(
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color.fromARGB(255, 53, 51, 51), Colors.black],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight),
-                  borderRadius: BorderRadius.vertical(
-                      top: Radius.elliptical(
-                          MediaQuery.of(context).size.width, 110))),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 30, right: 30, top: 60),
-              child: Form(
-                  child: Column(
-                children: [
-                  const Text(
-                    "Insert your data to login",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Material(
-                    elevation: 3.0,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20)),
-                      height: MediaQuery.of(context).size.height / 2.5,
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.only(
-                                left: 20.0, top: 5.0, bottom: 5.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: const Color.fromARGB(
-                                        255, 160, 160, 147)),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Center(
-                              child: TextFormField(
-                                controller: usernamecontroller,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please Enter Username';
-                                  }
-                                  return null;
-                                },
-                                decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Username',
-                                    hintStyle: TextStyle(
-                                        color: Color.fromARGB(
-                                            255, 160, 160, 147))),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.only(
-                                left: 20.0, top: 5.0, bottom: 5.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: const Color.fromARGB(
-                                        255, 160, 160, 147)),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Center(
-                              child: TextFormField(
-                                controller: userpasswordcontroller,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please Enter Password';
-                                  }
-                                  return null;
-                                },
-                                decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Password',
-                                    hintStyle: TextStyle(
-                                        color: Color.fromARGB(
-                                            255, 160, 160, 147))),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              loginAdmin();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: const Center(
-                                child: Text(
-                                  'Login',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              )),
+              height: MediaQuery.of(context).size.height,
+              child: Center(child: CircularProgressIndicator()),
             )
+          : Container(
+              child: Stack(
+                children: [
+                  _buildBackground(),
+                  _buildLoginForm(context),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildBackground() {
+    return Container(
+      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 8),
+      padding: const EdgeInsets.only(top: 45, left: 20, right: 20),
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color.fromARGB(255, 53, 51, 51), Colors.black],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.elliptical(MediaQuery.of(context).size.width, 110),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 30, right: 30, top: 60),
+      child: Form(
+        child: Column(
+          children: [
+            const Text(
+              "Login page",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 30),
+            _buildInputField(
+              controller: usernameController,
+              hintText: 'Username',
+              obscureText: false,
+            ),
+            const SizedBox(height: 20),
+            _buildInputField(
+              controller: passwordController,
+              hintText: 'Password',
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            _buildLoginButton(),
+            SizedBox(height: 10),
+            _buildRegisterOption(context),
           ],
         ),
       ),
     );
   }
 
-  loginAdmin() {
-    FirebaseFirestore.instance.collection("user_tb").get().then((snapshot) {
-      for (var result in snapshot.docs) {
-        if (result.data()['username'] != usernamecontroller.text.trim()) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-            'Your username is not correct',
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          )));
-        } else if (result.data()['password'] !=
-            userpasswordcontroller.text.trim()) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-            'Your password is not correct',
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          )));
-        } else {
-          Route route =
-              MaterialPageRoute(builder: (context) => const AddQuiz());
-          Navigator.pushReplacement(context, route);
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hintText,
+    required bool obscureText,
+  }) {
+    return Material(
+      elevation: 3.0,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: hintText,
+            hintStyle:
+                const TextStyle(color: Color.fromARGB(255, 160, 160, 147)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return GestureDetector(
+      onTap: () async {
+        setState(() {
+          isLoading = true;
+        });
+
+        try {
+          await DatabaseMethods().getExistingUser(
+            usernameController.text,
+            passwordController.text,
+            context,
+          );
+        } catch (e) {
+          // Handle any errors that occur during the database operation
+          print('Error: $e');
+        } finally {
+          await Future.delayed(Duration(milliseconds: 1800));
+          setState(() {
+            isLoading =
+                false; // Hide loading indicator after the operation is done
+          });
         }
-      }
-    });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Center(
+          child: Text(
+            'Login',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegisterOption(BuildContext context) {
+    return Row(
+      children: [
+        const Text(
+          "If you don't have an account ",
+          style: TextStyle(color: Colors.white60),
+        ),
+        GestureDetector(
+          onTap: () {
+            Route route =
+                MaterialPageRoute(builder: (context) => const AdminRegister());
+            Navigator.push(context, route);
+          },
+          child: const Text(
+            "Register",
+            style: TextStyle(
+              color: Colors.blueAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoader() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }

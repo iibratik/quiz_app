@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:questionapp/admin/add_quiz.dart';
 import 'package:questionapp/pages/question.dart';
+import 'package:questionapp/providers/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,6 +16,22 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffedf3f3f6),
+      floatingActionButton: Container(
+        width: 70,
+        height: 70,
+        child: FloatingActionButton(
+          backgroundColor: Colors.white,
+          onPressed: () {
+            Route route = MaterialPageRoute(builder: (context) => AddQuiz());
+            Navigator.push(context, route);
+          },
+          tooltip: 'Add quiz',
+          child: const Icon(
+            Icons.add,
+            size: 24,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
           child: Container(
         margin: const EdgeInsets.only(bottom: 30),
@@ -33,20 +52,44 @@ class _HomeState extends State<Home> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(60),
-                      child: Image.asset(
-                        "assets/img/user_profile.jpg",
+                      child: Image.network(
+                        context
+                            .watch<UserProvider>()
+                            .user['profilePicture']
+                            .toString(),
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            // If image has finished loading, return the image
+                            return child;
+                          } else {
+                            // If image is still loading, show a circular progress indicator
+                            return Container(
+                              width: 50,
+                              height: 50,
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ??
+                                            1)
+                                    : null,
+                              ),
+                            );
+                          }
+                        },
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
                       ),
                     ),
                     const SizedBox(
-                      width: 40,
+                      width: 20,
                     ),
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(top: 10),
                       child: Text(
-                        'Akrom Ibragimov',
+                        "Hello",
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -64,16 +107,11 @@ class _HomeState extends State<Home> {
                     borderRadius: BorderRadius.circular(30)),
                 margin: const EdgeInsets.only(top: 120, left: 20, right: 20),
                 child: Column(
-                  children: [
-                    ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            bottomLeft: Radius.circular(20)),
-                        child: Image.asset("assets/img/main_banner.jpg")),
-                    const SizedBox(
+                  children: const [
+                    SizedBox(
                       width: 30,
                     ),
-                    const Column(
+                    Column(
                       children: [
                         Text(
                           textAlign: TextAlign.center,
@@ -84,7 +122,7 @@ class _HomeState extends State<Home> {
                               fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'Play Quiz \n by guessing the image',
+                          'Play Quiz \n by guessing quizes',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Color(0xFFa4a4a4),
@@ -103,7 +141,7 @@ class _HomeState extends State<Home> {
             const Padding(
               padding: EdgeInsets.only(left: 20),
               child: Text(
-                'Top Quiz Categories',
+                'Quiz Categories',
                 style: TextStyle(
                     color: Colors.black,
                     fontSize: 23,
@@ -124,12 +162,11 @@ class _HomeState extends State<Home> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Question(
-                                    category: "Place",
+                                    category: "Presente",
                                   )));
                     },
                     child: CategoryCard(
-                      imageSrc: "assets/img/place.png",
-                      cardTitle: "Places",
+                      cardTitle: "Presente",
                     ),
                   ),
                   GestureDetector(
@@ -138,12 +175,11 @@ class _HomeState extends State<Home> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Question(
-                                    category: "Fruits",
+                                    category: "Passato remoto",
                                   )));
                     },
                     child: CategoryCard(
-                      imageSrc: "assets/img/fruit.jpg",
-                      cardTitle: "Fruits",
+                      cardTitle: "Imperfetto",
                     ),
                   ),
                 ],
@@ -151,81 +187,6 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(
               height: 20,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 20, right: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Sports",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      imageSrc: "assets/img/place.png",
-                      cardTitle: "Sports",
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Place",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      imageSrc: "assets/img/place.png",
-                      cardTitle: "Places",
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 20, right: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Place",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      imageSrc: "assets/img/place.png",
-                      cardTitle: "Places",
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Place",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      imageSrc: "assets/img/place.png",
-                      cardTitle: "Places",
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
@@ -235,12 +196,10 @@ class _HomeState extends State<Home> {
 }
 
 class CategoryCard extends StatelessWidget {
-  final String imageSrc;
   final String cardTitle;
 
   const CategoryCard({
     super.key,
-    required this.imageSrc,
     required this.cardTitle,
   });
 
@@ -256,12 +215,6 @@ class CategoryCard extends StatelessWidget {
             color: Colors.white, borderRadius: BorderRadius.circular(20)),
         child: Column(
           children: [
-            Image.asset(
-              imageSrc,
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
-            ),
             Text(
               cardTitle,
               style: const TextStyle(
