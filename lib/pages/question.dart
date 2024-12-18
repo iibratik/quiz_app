@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:questionapp/services/datebase.dart';
 
+
+// ignore: must_be_immutable
 class Question extends StatefulWidget {
   String category;
   Question({super.key, required this.category});

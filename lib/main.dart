@@ -27,7 +27,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String? username;
 
-  @override
   void getPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {

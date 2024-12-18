@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:questionapp/admin/add_quiz.dart';
-import 'package:questionapp/admin/admin_login.dart';
 import 'package:questionapp/pages/question.dart';
 import 'package:questionapp/admin/userSet.dart';
-import 'package:questionapp/providers/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
