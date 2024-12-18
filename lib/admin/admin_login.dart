@@ -45,7 +45,7 @@ class _AdminLoginState extends State<AdminLogin> {
       await setUserPref(res['username'], res['userImage']);
       Route route = MaterialPageRoute(builder: (context) => const Home());
       Navigator.pushReplacement(context, route);
-      await Future.delayed(Duration(milliseconds: 1800));
+      await Future.delayed(Duration(milliseconds: 1000));
     } catch (e) {
       // Handle any errors that occur during the database operation
       ScaffoldMessenger.of(context).showSnackBar(

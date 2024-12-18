@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
-
 class DatabaseMethods {
   // LOGIN EXISTING USER
   Future<Map<String, String>> getExistingUser(
@@ -73,14 +72,14 @@ class DatabaseMethods {
       final storage = FirebaseStorage.instance;
 
       // Input validation
-      if (password != confirmPass) {
-        throw Exception("Passwords do not match.");
-      }
-      if (userName.isEmpty) {
+      if (userName.trim().isEmpty) {
         throw Exception("Username cannot be empty.");
       }
       if (password.isEmpty) {
         throw Exception("Password cannot be empty.");
+      }
+      if (password != confirmPass) {
+        throw Exception("Passwords do not match.");
       }
 
       // Upload user profile image to Firebase Storage
@@ -88,27 +87,32 @@ class DatabaseMethods {
           'userProfileImages/${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference storageRef = storage.ref().child(fileName);
       UploadTask uploadTask = storageRef.putFile(userImage);
-      TaskSnapshot taskSnapshot = await uploadTask;
+
+      // Wait for image upload to complete
+      TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => {});
       String imageUrl = await taskSnapshot.ref.getDownloadURL();
 
       // Add user details to Firestore
-      await firestore.collection('users_tb').add({
+      DocumentReference userRef = await firestore.collection('users_tb').add({
         'username': userName,
         'password': password, // Note: Password should ideally be hashed
         'profilePicture': imageUrl,
       });
-      Map<String, String> user = {
+
+      // Return user data as a Map
+      return {
+        'userId': userRef.id.toString(),
         'username': userName.toString(),
-        'userImage': imageUrl.toString()
+        'userImage': imageUrl.toString(),
       };
-      return user;
     } catch (e) {
-      // Handle errors
+      // Handle errors and notify the user
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           'Error: ${e.toString()}',
-          style: const TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 16),
         ),
+        backgroundColor: Colors.red,
       ));
       return {"status": "error", "message": e.toString()};
     }

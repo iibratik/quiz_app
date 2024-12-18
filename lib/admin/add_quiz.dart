@@ -15,6 +15,7 @@ class _AddQuizState extends State<AddQuiz> {
         option3controller.text != "" &&
         option4controller.text != "") {
       Map<String, dynamic> addQuiz = {
+        "verb": verbcontroller.text,
         "option1": option1controller.text,
         "option2": option2controller.text,
         "option3": option3controller.text,
@@ -39,9 +40,15 @@ class _AddQuizState extends State<AddQuiz> {
 
   final List<String> categoryItems = [
     'Presente',
-    'Passato remoto',
+    'Passato-remoto',
+    'Passato-prossimo',
+    'Trapassato-remoto',
     'Imperfetto',
+    'Futuro',
+    'Trapassato-prossimo',
+    'Futuro-anteriore',
   ];
+  TextEditingController verbcontroller = TextEditingController();
   TextEditingController option1controller = TextEditingController();
   TextEditingController option2controller = TextEditingController();
   TextEditingController option3controller = TextEditingController();
@@ -83,6 +90,34 @@ class _AddQuizState extends State<AddQuiz> {
                       height: 20,
                     ),
                     Text(
+                      "Verb",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                          color: Color(0xFFececf8),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: TextField(
+                        controller: verbcontroller,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Insert your verb",
+                          hintStyle: TextStyle(
+                              color: Colors.black38,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
                       "Option 1",
                       style: TextStyle(
                           color: Colors.black87,
@@ -101,7 +136,7 @@ class _AddQuizState extends State<AddQuiz> {
                           border: InputBorder.none,
                           hintText: "Insert option 1",
                           hintStyle: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black38,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
                         ),
@@ -129,7 +164,7 @@ class _AddQuizState extends State<AddQuiz> {
                           border: InputBorder.none,
                           hintText: "Insert option 2",
                           hintStyle: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black38,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
                         ),
@@ -157,7 +192,7 @@ class _AddQuizState extends State<AddQuiz> {
                           border: InputBorder.none,
                           hintText: "Insert option 3",
                           hintStyle: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black38,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
                         ),
@@ -185,7 +220,7 @@ class _AddQuizState extends State<AddQuiz> {
                           border: InputBorder.none,
                           hintText: "Insert option 4",
                           hintStyle: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black38,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
                         ),
@@ -275,6 +310,9 @@ class _AddQuizState extends State<AddQuiz> {
                         });
                         await uploadItem();
                         await Future.delayed(Duration(seconds: 1));
+                        Route route = MaterialPageRoute(
+                            builder: (context) => const AddQuiz());
+                        Navigator.pushReplacement(context, route);
                         setState(() {
                           isLoading = true;
                         });

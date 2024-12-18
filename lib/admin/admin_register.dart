@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:questionapp/admin/admin_login.dart';
+import 'package:questionapp/pages/home.dart';
 import 'package:questionapp/services/datebase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,12 +32,12 @@ class _AdminRegisterState extends State<AdminRegister> {
     }
   }
 
-  void register() async {
+  Future register() async {
     setState(() {
       isLoading = true; // Show loading indicator when the user taps
     });
 
-    // Check if the selectedImage is null
+// Check if the selectedImage is null
     if (selectedImage == null) {
       setState(() {
         isLoading = false; // Stop loading if no image is selected
@@ -50,20 +51,30 @@ class _AdminRegisterState extends State<AdminRegister> {
 
     try {
       // Perform the database operation
-      Map<String, String> res = DatabaseMethods().setNewUser(
-          selectedImage!,
-          userNameController.text,
-          userPasswordController.text,
-          confirmPasswordController.text,
-          context) as Map<String, String>;
+      Map<String, String> res = await DatabaseMethods().setNewUser(
+        selectedImage!,
+        userNameController.text,
+        userPasswordController.text,
+        confirmPasswordController.text,
+        context,
+      );
+
+      // Store user information in preferences
       await setUserPref(res['username'], res['userImage']);
+
+      // Navigate to home screen
+      Route route = MaterialPageRoute(builder: (context) => const Home());
+      Navigator.pushReplacement(context, route);
     } catch (e) {
-      // Handle any errors that occur during the database operation
-      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sorry, some error occurred: ${e.toString()}')),
+      );
     } finally {
-      setState(() {
-        isLoading = false; // Hide loading indicator after the operation is done
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -89,7 +100,7 @@ class _AdminRegisterState extends State<AdminRegister> {
       backgroundColor: const Color(0xFFededeb),
       body: SingleChildScrollView(
         child: isLoading
-            ? SizedBox(
+            ? Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Center(child: CircularProgressIndicator()),
@@ -216,7 +227,9 @@ class _AdminRegisterState extends State<AdminRegister> {
                                     height: 20,
                                   ),
                                   GestureDetector(
-                                    onTap: () async {},
+                                    onTap: () async {
+                                      await register();
+                                    },
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 20),

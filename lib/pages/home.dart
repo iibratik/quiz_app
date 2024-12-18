@@ -182,32 +182,71 @@ class _HomeState extends State<Home> {
               padding: EdgeInsets.only(left: 20, right: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Presente",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      cardTitle: "Presente",
-                    ),
+                children: const [
+                  Category(
+                    path: "Presente",
+                    name: "Presente",
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Question(
-                                    category: "Passato remoto",
-                                  )));
-                    },
-                    child: CategoryCard(
-                      cardTitle: "Imperfetto",
-                    ),
+                  Category(
+                    path: "Passato-remoto",
+                    name: "Passato remoto",
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 20, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Category(
+                    path: "Passato-prossimo",
+                    name: "Passato prossimo",
+                  ),
+                  Category(
+                    path: "Trapassato-remoto",
+                    name: "Trapassato remoto",
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 20, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Category(
+                    path: "Imperfetto",
+                    name: "Imperfetto",
+                  ),
+                  Category(
+                    path: "Futuro",
+                    name: "Futuro",
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 20, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Category(
+                    path: "Trapassato-prossimo",
+                    name: "Trapassato prossimo",
+                  ),
+                  Category(
+                    path: "Futuro-anteriore",
+                    name: "Futuro anteriore",
                   ),
                 ],
               ),
@@ -218,6 +257,29 @@ class _HomeState extends State<Home> {
           ],
         ),
       )),
+    );
+  }
+}
+
+class Category extends StatelessWidget {
+  final String path;
+  final String name;
+  const Category({super.key, required this.path, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Question(
+                      category: this.path,
+                    )));
+      },
+      child: CategoryCard(
+        cardTitle: this.name,
+      ),
     );
   }
 }
@@ -236,7 +298,7 @@ class CategoryCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       elevation: 5,
       child: Container(
-        width: 150,
+        width: 160,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(20)),
@@ -244,9 +306,10 @@ class CategoryCard extends StatelessWidget {
           children: [
             Text(
               cardTitle,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                   color: Colors.black,
-                  fontSize: 22,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold),
             ),
           ],
