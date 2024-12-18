@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../pages/home.dart';
+import 'package:questionapp/pages/home.dart';
 import 'package:questionapp/services/datebase.dart';
 import 'package:questionapp/admin/admin_register.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({super.key});
@@ -15,12 +16,61 @@ class _AdminLoginState extends State<AdminLogin> {
   TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
+  void goRegisterPage() {
+    Route route =
+        MaterialPageRoute(builder: (context) => const AdminRegister());
+    Navigator.push(context, route);
+  }
+
+  Future setUserPref(username, userImageUrl) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    if (username != null) {
+      prefs.setString("username", username);
+      prefs.setString("userImageUrl", userImageUrl);
+    }
+  }
+
+  void login() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      Map<String, String> res = await DatabaseMethods().getExistingUser(
+        usernameController.text,
+        passwordController.text,
+        context,
+      );
+      await setUserPref(res['username'], res['userImage']);
+      Route route = MaterialPageRoute(builder: (context) => const Home());
+      Navigator.pushReplacement(context, route);
+      await Future.delayed(Duration(milliseconds: 1800));
+    } catch (e) {
+      // Handle any errors that occur during the database operation
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sorry some error ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFededeb),
       body: isLoading
-          ? Container(
+          ? SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: Center(child: CircularProgressIndicator()),
@@ -121,27 +171,8 @@ class _AdminLoginState extends State<AdminLogin> {
 
   Widget _buildLoginButton() {
     return GestureDetector(
-      onTap: () async {
-        setState(() {
-          isLoading = true;
-        });
-
-        try {
-          await DatabaseMethods().getExistingUser(
-            usernameController.text,
-            passwordController.text,
-            context,
-          );
-        } catch (e) {
-          // Handle any errors that occur during the database operation
-          print('Error: $e');
-        } finally {
-          await Future.delayed(Duration(milliseconds: 1800));
-          setState(() {
-            isLoading =
-                false; // Hide loading indicator after the operation is done
-          });
-        }
+      onTap: () {
+        login();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -172,9 +203,7 @@ class _AdminLoginState extends State<AdminLogin> {
         ),
         GestureDetector(
           onTap: () {
-            Route route =
-                MaterialPageRoute(builder: (context) => const AdminRegister());
-            Navigator.push(context, route);
+            goRegisterPage();
           },
           child: const Text(
             "Register",

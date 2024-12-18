@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:questionapp/admin/admin_login.dart';
 import 'package:questionapp/services/datebase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminRegister extends StatefulWidget {
   const AdminRegister({super.key});
@@ -21,6 +22,57 @@ class _AdminRegisterState extends State<AdminRegister> {
   File? selectedImage;
   bool isLoading = false;
 // FUNCTIONS
+  Future setUserPref(username, userImageUrl) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    if (username != null) {
+      prefs.setString("username", username);
+      prefs.setString("userImageUrl", userImageUrl);
+    }
+  }
+
+  void register() async {
+    setState(() {
+      isLoading = true; // Show loading indicator when the user taps
+    });
+
+    // Check if the selectedImage is null
+    if (selectedImage == null) {
+      setState(() {
+        isLoading = false; // Stop loading if no image is selected
+      });
+      // Show an error or message to the user if no image is selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image before registering')),
+      );
+      return;
+    }
+
+    try {
+      // Perform the database operation
+      Map<String, String> res = DatabaseMethods().setNewUser(
+          selectedImage!,
+          userNameController.text,
+          userPasswordController.text,
+          confirmPasswordController.text,
+          context) as Map<String, String>;
+      await setUserPref(res['username'], res['userImage']);
+    } catch (e) {
+      // Handle any errors that occur during the database operation
+      print('Error: $e');
+    } finally {
+      setState(() {
+        isLoading = false; // Hide loading indicator after the operation is done
+      });
+    }
+  }
+
+  Future setUsernamePref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("username", userNameController.text.toString());
+    prefs.clear();
+  }
+
   Future getImage() async {
     // Загрузка изображения, если оно выбрано
 
@@ -37,7 +89,7 @@ class _AdminRegisterState extends State<AdminRegister> {
       backgroundColor: const Color(0xFFededeb),
       body: SingleChildScrollView(
         child: isLoading
-            ? Container(
+            ? SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Center(child: CircularProgressIndicator()),
@@ -164,47 +216,7 @@ class _AdminRegisterState extends State<AdminRegister> {
                                     height: 20,
                                   ),
                                   GestureDetector(
-                                    onTap: () async {
-                                      setState(() {
-                                        isLoading =
-                                            true; // Show loading indicator when the user taps
-                                      });
-
-                                      // Check if the selectedImage is null
-                                      if (selectedImage == null) {
-                                        setState(() {
-                                          isLoading =
-                                              false; // Stop loading if no image is selected
-                                        });
-                                        // Show an error or message to the user if no image is selected
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  'Please select an image before registering')),
-                                        );
-                                        return;
-                                      }
-
-                                      try {
-                                        // Perform the database operation
-                                        await DatabaseMethods().setNewUser(
-                                          selectedImage!,
-                                          userNameController.text,
-                                          userPasswordController.text,
-                                          confirmPasswordController.text,
-                                          context,
-                                        );
-                                      } catch (e) {
-                                        // Handle any errors that occur during the database operation
-                                        print('Error: $e');
-                                      } finally {
-                                        setState(() {
-                                          isLoading =
-                                              false; // Hide loading indicator after the operation is done
-                                        });
-                                      }
-                                    },
+                                    onTap: () async {},
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 20),

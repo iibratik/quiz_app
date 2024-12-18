@@ -1,19 +1,21 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:questionapp/pages/home.dart';
 import 'package:questionapp/providers/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DatabaseMethods {
   // LOGIN EXISTING USER
-  Future<void> getExistingUser(
+  Future<Map<String, String>> getExistingUser(
       String username, String password, BuildContext context) async {
+    // Удаляем пробелы в начале и конце строк
     username = username.trim();
     password = password.trim();
 
+    // Проверяем, заполнены ли поля
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
@@ -21,47 +23,53 @@ class DatabaseMethods {
           style: TextStyle(fontSize: 18),
         ),
       ));
-      return;
+      return {"status": "error", "message": "Fields are empty"};
     }
 
     try {
-      FirebaseFirestore.instance.collection("users_tb").get().then((snapshot) {
-        bool isLoggedIn = false;
-        for (var result in snapshot.docs) {
-          final Map<String, String> userData =
-              Map<String, String>.from(result.data());
-          ;
-          if (userData['username'] == username &&
-              userData['password'] == password) {
-            context.read<UserProvider>().loginUser(enterUser: userData);
-            Route route = MaterialPageRoute(builder: (context) => const Home());
-            Navigator.pushReplacement(context, route);
-            isLoggedIn = true;
-            break;
-          }
+      // Получаем данные из коллекции Firestore
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection("users_tb").get();
+
+      for (var result in snapshot.docs) {
+        final Map<String, dynamic> userData =
+            result.data() as Map<String, dynamic>;
+
+        // Проверяем соответствие имени пользователя и пароля
+        if (userData['username'] == username &&
+            userData['password'] == password) {
+          return {
+            "status": "success",
+            "username": userData['username'],
+            "userImage": userData['profilePicture'],
+            "userId": result.id
+          };
         }
-        if (!isLoggedIn) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-              'Invalid username or password',
-              style: TextStyle(fontSize: 18),
-            ),
-          ));
-        }
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      }
+
+      // Если пользователя с указанными данными не найдено
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
-          e.toString(),
+          'Invalid username or password',
           style: TextStyle(fontSize: 18),
         ),
       ));
+      return {"status": "error", "message": "Invalid credentials"};
+    } catch (e) {
+      // Обработка исключений
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          e.toString(),
+          style: const TextStyle(fontSize: 18),
+        ),
+      ));
+      return {"status": "error", "message": e.toString()};
     }
   }
 
   // REGISTER NEW USER
-  Future<void> setNewUser(File userImage, String userName, String password,
-      String confirmPass, BuildContext context) async {
+  Future<Map<String, String>> setNewUser(File userImage, String userName,
+      String password, String confirmPass, BuildContext context) async {
     try {
       // Firestore and Storage references
       final firestore = FirebaseFirestore.instance;
@@ -94,11 +102,9 @@ class DatabaseMethods {
       });
       Map<String, String> user = {
         'username': userName.toString(),
-        'profilePicture': imageUrl.toString()
+        'userImage': imageUrl.toString()
       };
-      context.read<UserProvider>().loginUser(enterUser: user);
-      Route route = MaterialPageRoute(builder: (context) => const Home());
-      Navigator.pushReplacement(context, route);
+      return user;
     } catch (e) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -107,6 +113,7 @@ class DatabaseMethods {
           style: const TextStyle(fontSize: 18),
         ),
       ));
+      return {"status": "error", "message": e.toString()};
     }
   }
 

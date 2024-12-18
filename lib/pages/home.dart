@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:questionapp/admin/add_quiz.dart';
+import 'package:questionapp/admin/admin_login.dart';
 import 'package:questionapp/pages/question.dart';
+import 'package:questionapp/admin/userSet.dart';
 import 'package:questionapp/providers/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,11 +15,28 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String? username;
+  String? userImage;
+  void getPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString("username");
+      userImage = prefs.getString("userImageUrl");
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPref();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffedf3f3f6),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         width: 70,
         height: 70,
         child: FloatingActionButton(
@@ -50,37 +70,47 @@ class _HomeState extends State<Home> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
-                      child: Image.network(
-                        context
-                            .watch<UserProvider>()
-                            .user['profilePicture']
-                            .toString(),
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            // If image has finished loading, return the image
-                            return child;
-                          } else {
-                            // If image is still loading, show a circular progress indicator
-                            return Container(
-                              width: 50,
-                              height: 50,
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        (loadingProgress.expectedTotalBytes ??
-                                            1)
-                                    : null,
-                              ),
-                            );
-                          }
-                        },
-                        height: 50,
-                        width: 50,
-                        fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: () {
+                        Route route = MaterialPageRoute(
+                            builder: (context) => UserCabinet());
+                        Navigator.push(context, route);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(60),
+                        child: userImage != null
+                            ? Image.network(
+                                userImage!,
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    // If image has finished loading, return the image
+                                    return child;
+                                  } else {
+                                    // If image is still loading, show a circular progress indicator
+                                    return SizedBox(
+                                      width: 50,
+                                      height: 50,
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                (loadingProgress
+                                                        .expectedTotalBytes ??
+                                                    1)
+                                            : null,
+                                      ),
+                                    );
+                                  }
+                                },
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(),
                       ),
                     ),
                     const SizedBox(
@@ -89,7 +119,7 @@ class _HomeState extends State<Home> {
                     Padding(
                       padding: EdgeInsets.only(top: 10),
                       child: Text(
-                        "Hello",
+                        '$username',
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,

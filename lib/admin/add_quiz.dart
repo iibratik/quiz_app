@@ -61,7 +61,7 @@ class _AddQuizState extends State<AddQuiz> {
       ),
       body: SingleChildScrollView(
         child: isLoading
-            ? Container(
+            ? SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Center(child: CircularProgressIndicator()),
