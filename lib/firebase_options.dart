@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '487408505500',
     projectId: 'quiz-app-11d6c',
     storageBucket: 'quiz-app-11d6c.firebasestorage.app',
-    iosBundleId: 'com.example.questionapp',
+    iosBundleId: 'com.zerocorp.questionapp',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '487408505500',
     projectId: 'quiz-app-11d6c',
     storageBucket: 'quiz-app-11d6c.firebasestorage.app',
-    iosBundleId: 'com.example.questionapp',
+    iosBundleId: 'com.zerocorp.questionapp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

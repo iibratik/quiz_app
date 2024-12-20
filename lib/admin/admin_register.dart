@@ -38,7 +38,10 @@ class _AdminRegisterState extends State<AdminRegister> {
     });
 
 // Check if the selectedImage is null
-    if (selectedImage == null) {
+    if (selectedImage == null &&
+        userNameController.text != '' &&
+        confirmPasswordController.text != '' &&
+        userPasswordController.text != '') {
       setState(() {
         isLoading = false; // Stop loading if no image is selected
       });
@@ -50,21 +53,32 @@ class _AdminRegisterState extends State<AdminRegister> {
     }
 
     try {
+      if (selectedImage == null &&
+          userNameController.text != '' &&
+          confirmPasswordController.text != '' &&
+          userPasswordController.text != '') {
+        Map<String, String> res = await DatabaseMethods()
+            .setNewUser(
+          selectedImage!,
+          userNameController.text,
+          userPasswordController.text,
+          confirmPasswordController.text,
+          context,
+        )
+            .then((res) async {
+          // Store user information in preferences
+          await setUserPref(res['username'], res['userImage']);
+          // Navigate to home screen
+          Route route = MaterialPageRoute(builder: (context) => const Home());
+          Navigator.pushReplacement(context, route);
+          return res;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fill all fields!')),
+        );
+      }
       // Perform the database operation
-      Map<String, String> res = await DatabaseMethods().setNewUser(
-        selectedImage!,
-        userNameController.text,
-        userPasswordController.text,
-        confirmPasswordController.text,
-        context,
-      );
-
-      // Store user information in preferences
-      await setUserPref(res['username'], res['userImage']);
-
-      // Navigate to home screen
-      Route route = MaterialPageRoute(builder: (context) => const Home());
-      Navigator.pushReplacement(context, route);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Sorry, some error occurred: ${e.toString()}')),

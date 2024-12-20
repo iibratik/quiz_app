@@ -37,15 +37,28 @@ class _AdminLoginState extends State<AdminLogin> {
     });
 
     try {
-      Map<String, String> res = await DatabaseMethods().getExistingUser(
-        usernameController.text,
-        passwordController.text,
-        context,
-      );
-      await setUserPref(res['username'], res['userImage']);
-      Route route = MaterialPageRoute(builder: (context) => const Home());
-      Navigator.pushReplacement(context, route);
-      await Future.delayed(Duration(milliseconds: 1000));
+      if (usernameController.text != '' && passwordController.text != '') {
+        Map<String, String> res = await DatabaseMethods()
+            .getExistingUser(
+          usernameController.text,
+          passwordController.text,
+          context,
+        )
+            .then(
+          (res) async {
+            await setUserPref(res['username'], res['userImage']);
+            Route route = MaterialPageRoute(builder: (context) => const Home());
+            Navigator.pushReplacement(context, route);
+            await Future.delayed(Duration(milliseconds: 1000));
+            return res;
+          },
+        );
+      } else {
+        // Handle any errors that occur during the database operation
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fill both fields')),
+        );
+      }
     } catch (e) {
       // Handle any errors that occur during the database operation
       ScaffoldMessenger.of(context).showSnackBar(
